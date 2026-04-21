@@ -1,3 +1,11 @@
+/* (LORELEI) WHATS HAPPENING?
+    I HAVE ADDED MY IDEAS SO FAR ON HOW TO GO ABOUT ADDING STATIONS.
+    THESE IDEAS FOR CODE ARE NOT FINAL AND DO NOT WORK YET, BUT I WANTED TO GET THEM DOWN SOMEWHERE.
+    WE SHOULD ADD A LEGEND TO THE SCATTERPLOT TO EXPLAIN WHICH COLOR CORRESPONDS TO WHICH DEPLOYMENT_ID/NAME. 
+    ALSO, I REALIZED WE ARE USING DEPLOYMENT_ID INSTEAD OF DEPLOYMENT_NAME, BUT IT IS EASILY CHANGED.
+    IF STATIONS DON'T ACTUALLY CORRESPONT TO DEPLOYMENTS NONE OF THIS IS VALID LOL.
+*/
+
 const data = await d3.csv('mothitor.csv')
 
 // changing date format from month abbreviation to numerical
@@ -13,7 +21,13 @@ dateStrings = Array.from(new Set((dateStrings)))
 
 // storing counts for each date
 let counts = []
+// (LORELEI) REPLACE BELOW CODE!!
 const grouped = d3.group(data, d => d.date.toISOString())
+/* (LORELEI) ^^^^REPLACE THIS WITH THE BELOW CODE^^^
+    const grouped = d3.group(data,
+    d => d.date.toISOString(),
+    d => d.deployment_id
+);*/
 console.log(grouped)
 console.log(dateStrings)
 
@@ -32,7 +46,29 @@ const sortedDates = dates.sort((a, b) => a - b);
 console.log(sortedDates);
 
 // creating data array for scatterplot
+// (LORELEI) SCATTERPLOT ARRAY NEEDS TO BE EDITED TO INCLUDE DEPLOYMENT_ID, 
 const scatterData = counts.map((val, index) => [val, dates[index]]);
+/* I'M NOT SURE ENTIRELY HOW TO GO ABOUT THIS. BELOW IS THE SUGGESTED METHOD BY VS CODE CHAT'S 
+   SUGGESTION ON MY CODE ATTEMPT AT IT THAT DIDNT WORK. I WOULD NOT SUGGEST BLINDLY TRUSTING IT
+
+const scatterData = [];
+for (const [dateStr, deployments] of grouped) {
+    for (const [deploymentId, observations] of deployments) {
+        scatterData.push({
+            count: observations.length,
+            date: new Date(dateStr),
+            deployment_id: deploymentId
+        });
+    }
+} */
+
+/* (LORELEI) COLORS FOR SCATTERPLOT POINTS SHOULD BE COLORBLIND FRIENDLY!!
+    ALSO WE SHOULD BE EASILY ABLE TO CHANGE TO DEPLOYMENT_NAME SINCE I REALIZED HERE WE ARE USING THE ID*/
+/*const colorMap = {
+    "296": "black",
+    "297": "blue", 
+    "325": "orange"
+};*/
 
 // x axis
 const x = d3.scaleTime()
@@ -61,6 +97,8 @@ d3.select('#points')
     .data(scatterData)
     .enter()
     .append("circle")
+        /* (LORELEI) WHY CANT IT JUST BE ".attr("cx", d => x(d.date))" AND ".attr( "cy", d => y(d.count))"
+         FOR THE BELOW CODE? */
         .attr("cx", function (d) { 
             console.log(x(d[1]))
             return x(d[1]); 
@@ -69,5 +107,6 @@ d3.select('#points')
             return y(d[0]); 
         } )
         .attr("r", 3)
-        .style("fill", "red");
+        // (LORELEI) CODE BELOW NEEDS TO BE ADDED TO HAVE COLOR BE BY DEPLOYMENT_ID
+        /*.style("fill", d => colorMap[d.deployment_id]); */
 
